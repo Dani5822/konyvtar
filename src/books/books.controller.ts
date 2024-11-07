@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
@@ -19,7 +19,9 @@ export class BooksController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.booksService.findOne(+id);
+    const book=this.booksService.findOne(+id);
+    if(book){return book;}
+    throw new NotFoundException('Book not found');
   }
 
   @Patch(':id')
@@ -29,6 +31,8 @@ export class BooksController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.booksService.remove(+id);
+    const response=this.booksService.remove(+id);
+    if(response){return { statusCode: 204, message: 'Book deleted successfully' };}
+    return new NotFoundException('Book not found');
   }
 }

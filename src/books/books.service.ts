@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { Book } from './entities/book.entity';
-import e from 'express';
 
 @Injectable()
 export class BooksService {
@@ -44,18 +43,18 @@ export class BooksService {
   ];
   create(createBookDto: CreateBookDto) {
 
-    let help = new Book();
+    let help = {
+      ...createBookDto,
+      id:0,
+      reserved : false
+    };
     if (this.books.length == 0) {
       help.id = 1
     }
     else {
       help.id = this.books[this.books.length - 1].id + 1;
     }
-    help.title = createBookDto.title;
-    help.author = createBookDto.author;
-    help.reserved = false;
-    help.isbn = createBookDto.isbn;
-    help.publishYear = createBookDto.publishYear;
+    
     this.books.push(help);
     return this.findAll()
   }
@@ -80,23 +79,22 @@ export class BooksService {
           ...element,
           ...updateBookDto
         }
-        this.books[idx]=element
-       
+        this.books[idx]=element;
       }
-      console.log(element)
     });
+    
   };
 
 
 remove(id: number) {
-  this.books.splice(this.books.findIndex((book) => {
-    if (book.id === id) {
-      console.log(book)
-      return book.id
-    }
+  const book=this.books.findIndex((book) => {book.id==id});
+  
+  if(book==-1){
+    return false;
+  }else{
+    this.books.splice(book, 1);
+    return true;
   }
-
-  ), 1);
-
+  
 }
 }
