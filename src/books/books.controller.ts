@@ -30,9 +30,10 @@ export class BooksController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    const response=this.booksService.remove(+id);
-    if(response){return { statusCode: 204, message: 'Book deleted successfully' };}
-    return new NotFoundException('Book not found');
+  async remove(@Param('id') id: string) {
+    if(await this.booksService.remove(+id)){
+      return { statusCode: 204, message: 'Book deleted successfully' };
+    }
+    throw new NotFoundException('Book not found');
   }
 }

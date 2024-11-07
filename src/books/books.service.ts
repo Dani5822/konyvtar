@@ -2,9 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { Book } from './entities/book.entity';
+import * as mysql from 'mysql2/promise'
 
 @Injectable()
 export class BooksService {
+  mysql :mysql.Pool;
+  constructor() {
+    this.mysql = mysql.createPool({
+      host: 'localhost',
+      user: 'root',
+      database: 'konyvtar',
+    })
+  }
   books: Book[] = [{
     id: 1,
     title: "string",
@@ -37,9 +46,6 @@ export class BooksService {
     publishYear: 10,
     reserved: false,
   }
-
-
-
   ];
   create(createBookDto: CreateBookDto) {
 
@@ -59,8 +65,9 @@ export class BooksService {
     return this.findAll()
   }
 
-  findAll() {
-    return this.books;
+  async findAll() {
+    const [results] =await this.mysql.query('SELECT * FROM books')
+    return results;
   }
 
   findOne(id: number) {
@@ -71,7 +78,8 @@ export class BooksService {
     });
   }
 
-  update(id: number, updateBookDto: UpdateBookDto) {
+  async update(id: number, updateBookDto: UpdateBookDto) {
+    await this.mysql.query('UPDATE books SET title = ?, author = ?, isbn = ?, publishYear = ?, reserved = ? WHERE id = ?', [updateBookDto.title, updateBookDto.author, updateBookDto.isbn, updateBookDto.publishYear, updateBookDto.reserved, id])
    
     this.books.forEach((element, idx) => {
       if (element.id == id) {
@@ -85,16 +93,8 @@ export class BooksService {
     
   };
 
-
-remove(id: number) {
-  const book=this.books.findIndex((book) => {book.id==id});
-  
-  if(book==-1){
-    return false;
-  }else{
-    this.books.splice(book, 1);
-    return true;
+  async remove(id: number) {
+    const[results]=await this.mysql.query('DELETE FROM books WHERE id = ?', [id])
+    return (results as mysql.ResultSetHeader).affectedRows==1;
   }
-  
-}
 }
