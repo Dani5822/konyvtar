@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { Book } from './entities/book.entity';
@@ -79,18 +79,24 @@ export class BooksService {
   }
 
   async update(id: number, updateBookDto: UpdateBookDto) {
-    await this.mysql.query('UPDATE books SET title = ?, author = ?, isbn = ?, publishYear = ?, reserved = ? WHERE id = ?', [updateBookDto.title, updateBookDto.author, updateBookDto.isbn, updateBookDto.publishYear, updateBookDto.reserved, id])
-   
+    
+    let book: Book;
     this.books.forEach((element, idx) => {
       if (element.id == id) {
-        element = {
+        book = {
           ...element,
           ...updateBookDto
         }
-        this.books[idx]=element;
+        this.books[idx]=book;
+        return;
       }
     });
-    
+    if(book!=undefined){
+      await this.mysql.query('UPDATE books SET title = ?, author = ?, isbn = ?, publishYear = ?, reserved = ? WHERE id = ?', [book.title, book.author, book.isbn, book.publishYear, book.reserved, id])
+      return true;
+    }else{
+      return false;
+    }
   };
 
   async remove(id: number) {
