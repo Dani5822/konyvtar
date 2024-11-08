@@ -8,25 +8,27 @@ export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
   @Post()
-  create(@Body() createBookDto: CreateBookDto) {
-    return this.booksService.create(createBookDto);
+  async create(@Body() createBookDto: CreateBookDto) {
+    return await this.booksService.create(createBookDto);
   }
 
   @Get()
-  findAll() {
-    return this.booksService.findAll();
+  async findAll() {
+    return await this.booksService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    const book=this.booksService.findOne(+id);
-    if(book){return book;}
+  async findOne(@Param('id') id: string) {
+    const book = await this.booksService.findOne(+id);
+    if (book !== null) {
+        return book;
+    }
     throw new NotFoundException('Book not found');
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
-    if(this.booksService.update(+id, updateBookDto)){
+  async update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
+    if( await this.booksService.update(+id, updateBookDto)){
       return { statusCode: 200, message: 'Book updated successfully' };
     }
     throw new NotFoundException('Book not found');
@@ -34,7 +36,7 @@ export class BooksController {
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    if(await this.booksService.remove(+id)){
+    if( await this.booksService.remove(+id)){
       return { statusCode: 204, message: 'Book deleted successfully' };
     }
     throw new NotFoundException('Book not found');

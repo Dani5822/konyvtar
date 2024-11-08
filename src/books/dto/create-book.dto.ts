@@ -15,5 +15,5 @@ export class CreateBookDto {
 
     @IsNotEmpty()
     @IsInt()
-    publishYear:number;
+    publisYear:number;
 }

@@ -13,4 +13,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
+model Book{
+  id Int @id @default(autoincrement())
+  title String
+  author String
+  isbn String
+  publisYear Int @db.Year
+  reserved Boolean @default(false)
+}
